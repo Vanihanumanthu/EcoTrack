@@ -1,0 +1,54 @@
+/* 🌿 Global Styles */
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #f7fdf7;
+    color: #2f4f2f;
+}
+
+/* 🌍 Header */
+h1, h2, h3, h4, h5 {
+    font-weight: 600;
+    color: #2e7d32;
+}
+
+/* 💚 CTA Button */
+.btn-success {
+    background-color: #388e3c;
+    border-color: #2e7d32;
+}
+
+.btn-success:hover {
+    background-color: #2e7d32;
+    border-color: #1b5e20;
+}
+
+/* 🌱 Emission Counter */
+#co2-counter {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #d32f2f;
+}
+
+/* 📦 Card Styling */
+.card {
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
+/* 🦶 Footprint Form */
+.form-label {
+    font-weight: 500;
+    color: #33691e;
+}
+
+input, select {
+    border-radius: 8px;
+}
+
+/* 🧾 Footer */
+footer {
+    background-color: #e8f5e9;
+    font-size: 0.95rem;
+    color: #4e944f;
+}

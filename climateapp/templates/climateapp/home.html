@@ -1,0 +1,145 @@
+{% extends 'climateapp/base.html' %}
+{% load static %}
+{% block title %}Home | EcoTrack{% endblock %}
+{% block content %}
+
+<!-- 🎨 Inline Styles for Smooth, Modern UI -->
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;600;800&display=swap');
+
+    body {
+        font-family: 'Nunito', sans-serif;
+        background: linear-gradient(135deg, #e6f9ea, #f1f8e9);
+    }
+
+    .fade-in {
+        animation: fadeIn 1.2s ease-in forwards;
+        opacity: 0;
+    }
+
+    @keyframes fadeIn {
+        to { opacity: 1; }
+    }
+
+    .floating {
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .eco-header-blue {
+        background: linear-gradient(135deg, #d2e9f7, #edf4fa);
+        border: 1px solid #b3e5fc;
+        border-radius: 20px;
+    }
+
+    .btn-animated {
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(56, 142, 60, 0.3);
+        font-weight: bold;
+    }
+
+    .btn-animated:hover {
+        transform: scale(1.06);
+        background-color: #2e7d32 !important;
+        color: #fff;
+    }
+
+    .eco-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-radius: 16px;
+        background: #ffffff;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+
+    .eco-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 28px rgba(0,0,0,0.1);
+    }
+
+    .eco-icon {
+        font-size: 2.5rem;
+        color: #43a047;
+        margin-bottom: 0.5rem;
+    }
+
+    #co2-counter {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #d32f2f;
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #2e7d32;
+    }
+</style>
+
+<!-- 🌿 Header Section -->
+<div class="text-center p-5 rounded shadow fade-in eco-header-blue">
+    <h1 class="display-3 text-success floating">🌱 Welcome to EcoTrack</h1>
+    <p class="lead">Track your lifestyle. Reduce your climate impact. Live greener.</p>
+    <a href="{% url 'calculator' %}" class="btn btn-success btn-lg mt-3 btn-animated">🌍 Start My Footprint Test</a>
+</div>
+
+<!-- 🌍 CO2 Counter Section -->
+<div class="text-center mt-5 fade-in">
+    <h4 class="section-title mb-3">🌍 Live Global CO₂ Emissions</h4>
+    <p id="co2-counter">0</p>
+    <p class="text-secondary">🌾 A plant-based meal can save ~100kg CO₂ per year.</p>
+</div>
+
+<!-- 💡 Features Section -->
+<div class="row text-center mt-5 fade-in g-4">
+    <div class="col-md-4">
+        <div class="eco-card p-4">
+            <div class="eco-icon">♻️</div>
+            <h5>Green Habits</h5>
+            <p>Small lifestyle changes can significantly reduce your emissions footprint.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="eco-card p-4">
+            <div class="eco-icon">📊</div>
+            <h5>Track Progress</h5>
+            <p>Monitor your carbon scores and improvements over time with our insights.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="eco-card p-4">
+            <div class="eco-icon">🌐</div>
+            <h5>Inspire Others</h5>
+            <p>Share your climate journey with the world and encourage eco-friendly action.</p>
+        </div>
+    </div>
+</div>
+
+<!-- 🔢 JS Counter Animation -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const counter = document.getElementById('co2-counter');
+        let value = 0;
+        const target = 3456789123;
+        const step = Math.ceil(target / 100);
+
+        const animate = () => {
+            value += step;
+            if (value >= target) {
+                value = target;
+                counter.textContent = value.toLocaleString() + ' tons';
+            } else {
+                counter.textContent = value.toLocaleString();
+                requestAnimationFrame(animate);
+            }
+        };
+
+        animate();
+    });
+</script>
+
+{% endblock %}
+

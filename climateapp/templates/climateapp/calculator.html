@@ -1,0 +1,164 @@
+{% extends 'climateapp/base.html' %}
+{% load static %}
+{% block title %}Impact Dashboard | EcoTrack{% endblock %}
+{% block content %}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<style>
+  .nav-pills .nav-link.active { background-color: #4caf50; }
+  .calculator-box {
+    border-radius: 12px;
+    padding: 2rem;
+    background-color: #f0fdf4;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+  }
+  .summary-box {
+    background-color: #e8f5e9;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    position: sticky;
+    top: 90px;
+  }
+</style>
+
+<div class="container mt-5">
+  <h2 class="text-success fw-bold text-center mb-4">🌱 EcoTrack Calculator Dashboard</h2>
+
+  <div class="row">
+    <!-- Sidebar Navigation -->
+    <div class="col-md-3">
+      <div class="nav flex-column nav-pills me-3" id="tab-list" role="tablist">
+        <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#tab-diet">🌾 Diet</button>
+        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-commute">🚗 Commute</button>
+        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-energy">💡 Energy</button>
+        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-water">🌧️ Water</button>
+      </div>
+    </div>
+
+    <!-- Main Form and Summary -->
+    <div class="col-md-6">
+      <form id="ecoForm">
+        <div class="tab-content">
+          <!-- Diet Tab -->
+          <div class="tab-pane fade show active calculator-box" id="tab-diet">
+            <h4>🌾 Diet Impact</h4>
+            <div class="mb-3"><label>🍖 Meat Meals per Week</label><input id="meat" type="number" class="form-control" /></div>
+            <div class="mb-3"><label>🥗 Veg Meals per Week</label><input id="veg" type="number" class="form-control" /></div>
+            <div class="mb-3"><label>🧀 Dairy per Day</label><input id="dairy" type="number" class="form-control" /></div>
+            <div class="mb-3"><label>🍳 Eggs per Week</label><input id="eggs" type="number" class="form-control" /></div>
+          </div>
+
+          <!-- Commute Tab -->
+          <div class="tab-pane fade calculator-box" id="tab-commute">
+            <h4>🚗 Commute</h4>
+            <div class="mb-3"><label>Mode (Car/Bus/Train)</label><input id="mode" type="text" class="form-control" /></div>
+            <div class="mb-3"><label>Distance per Day (km)</label><input id="distance" type="number" class="form-control" /></div>
+            <div class="mb-3"><label>Trips per Week</label><input id="trips" type="number" class="form-control" /></div>
+          </div>
+
+          <!-- Energy Tab -->
+          <div class="tab-pane fade calculator-box" id="tab-energy">
+            <h4>💡 Energy</h4>
+            <div class="mb-3"><label>🔌 LED Bulbs</label><input id="bulbs" type="number" class="form-control" /></div>
+            <div class="mb-3"><label>🕒 Hours Used/Day</label><input id="hours" type="number" class="form-control" /></div>
+            <div class="mb-3"><label>⚡ Cost/kWh</label><input id="cost" type="number" class="form-control" /></div>
+          </div>
+
+          <!-- Water Tab -->
+          <div class="tab-pane fade calculator-box" id="tab-water">
+            <h4>🌧️ Water</h4>
+            <div class="mb-3"><label>🚿 Showers per Day</label><input id="showers" type="number" class="form-control" /></div>
+            <div class="mb-3"><label>⏱️ Minutes per Shower</label><input id="duration" type="number" class="form-control" /></div>
+            <div class="mb-3"><label>🚰 Tap/Laundry Uses per Day</label><input id="tap" type="number" class="form-control" /></div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-success w-100 mt-4">🧮 Calculate Total</button>
+      </form>
+    </div>
+
+    <!-- Overall Summary -->
+    <div class="col-md-3">
+      <div class="summary-box" id="resultContainer" style="display:none;">
+        <h5 class="fw-bold">🌍 Monthly CO₂ Emission</h5>
+        <p class="display-6"><span id="co2Total">0</span> kg</p>
+        <hr>
+        <h6>🌟 Smart Suggestions</h6>
+        <p id="suggestions" class="text-muted mb-0"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('ecoForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+
+  const meat = +document.getElementById('meat').value || 0;
+  const veg = +document.getElementById('veg').value || 0;
+  const dairy = +document.getElementById('dairy').value || 0;
+  const eggs = +document.getElementById('eggs').value || 0;
+  const mode = (document.getElementById('mode').value || '').toLowerCase();
+  const distance = +document.getElementById('distance').value || 0;
+  const trips = +document.getElementById('trips').value || 0;
+  const bulbs = +document.getElementById('bulbs').value || 0;
+  const hours = +document.getElementById('hours').value || 0;
+  const cost = +document.getElementById('cost').value || 0;
+  const showers = +document.getElementById('showers').value || 0;
+  const duration = +document.getElementById('duration').value || 0;
+  const tap = +document.getElementById('tap').value || 0;
+
+  const dietCO2 = ((meat * 2.5) + (veg * 0.9) + (dairy * 0.5 * 7) + (eggs * 0.4)) * 4;
+  let commuteFactor = 0.21;
+  if (mode === 'bus') commuteFactor = 0.09;
+  else if (mode === 'train') commuteFactor = 0.05;
+  else if (mode === 'bike') commuteFactor = 0.01;
+  const commuteCO2 = distance * commuteFactor * trips * 4;
+  const energyCO2 = bulbs * hours * 30 * 0.006;
+  const waterCO2 = ((showers * duration * 9) + (tap * 6)) * 0.0015 * 30;
+
+  const total = Math.round((dietCO2 + commuteCO2 + energyCO2 + waterCO2) * 10) / 10;
+  document.getElementById('co2Total').textContent = total;
+
+  let tips = [];
+  if (meat > 7) tips.push("Try reducing meat meals.");
+  if (mode === 'car' && distance > 50) tips.push("Switch to public transport.");
+  if (bulbs < 5) tips.push("Use more LED bulbs.");
+  if (showers > 2 && duration > 10) tips.push("Take shorter showers.");
+
+  document.getElementById('suggestions').textContent = tips.length
+    ? tips.join(" ")
+    : "Great job! You're eco-conscious 💚";
+
+  document.getElementById('resultContainer').style.display = "block";
+
+  // ✅ Save data to profile
+  fetch("{% url 'save-impact' %}", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": "{{ csrf_token }}"
+    },
+    body: JSON.stringify({
+      diet: Math.round(dietCO2 * 10) / 10,
+      commute: Math.round(commuteCO2 * 10) / 10,
+      energy: Math.round(energyCO2 * 10) / 10,
+      water: Math.round(waterCO2 * 10) / 10,
+      total: total
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.status === 'success') {
+      console.log('✅ Saved to profile (ID:', data.saved_id, ')');
+    } else {
+      console.warn('⚠️ Could not save to profile');
+    }
+  });
+});
+</script>
+
+{% endblock %}

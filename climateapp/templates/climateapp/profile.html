@@ -1,0 +1,150 @@
+{% extends 'climateapp/base.html' %}
+{% load static %}
+{% block title %}My Profile | EcoTrack{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="text-success fw-bold text-center mb-4 display-5">👤 {{ user.username }}'s Profile</h2>
+
+  <!-- 🌳 Tree Growth -->
+  <div class="card shadow-lg p-4 mb-5 rounded-4 border-success bg-light position-relative overflow-hidden">
+    <h4 class="mb-4 text-success display-6 text-center">🌱 Your Tree Growth</h4>
+
+    <div class="position-relative d-flex justify-content-center align-items-center" style="height: 300px;">
+      <div id="rainContainer" class="position-absolute w-100 h-100 top-0 start-0 z-1"></div>
+
+      <!-- ✅ Tree Image -->
+      <img id="treeImage"
+           src="{% static 'images/tree_stage_' %}{{ tree_stage|default:'0' }}.png"
+           class="tree-image img-fluid rounded shadow z-2"
+           style="max-height: 260px;"
+           alt="Tree">
+    </div>
+
+    <!-- ✅ Progress Bar -->
+    <div class="progress mt-4" style="height: 20px;">
+      <div class="progress-bar bg-success progress-bar-striped progress-bar-animated"
+           role="progressbar"
+           style="width: {{ tree_growth }}%;"
+           aria-valuenow="{{ tree_growth }}"
+           aria-valuemin="0"
+           aria-valuemax="100">
+        {{ tree_growth }}%
+      </div>
+    </div>
+    <p class="text-muted small mt-2 text-center">Complete tasks to grow your eco-tree 🌳</p>
+  </div>
+
+  <!-- 📊 Weekly Progress Chart -->
+  <div class="card shadow-lg p-4 rounded-4 bg-white">
+    <h4 class="text-center text-success fw-bold mb-4">📊 Weekly CO₂ Progress</h4>
+    {% if progress %}
+      <canvas id="weeklyChart" height="140"></canvas>
+    {% else %}
+      <p class="text-muted text-center">No data available. Use the calculator to get started.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- 🔊 Audio -->
+<audio id="waterSound" src="{% static 'images/water.mp3' %}" preload="auto"></audio>
+
+<!-- 📦 Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<!-- 🎨 Styles -->
+<style>
+.tree-image {
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 1.5s ease-in-out;
+}
+.tree-image.grow {
+  opacity: 1;
+  transform: scale(1);
+}
+.raindrop {
+  position: absolute;
+  width: 8px;
+  height: 20px;
+  background: rgba(0, 153, 255, 0.5);
+  border-radius: 50%;
+  animation: raindrop 1.2s linear forwards;
+}
+@keyframes raindrop {
+  0% { transform: translateY(-40px); opacity: 0.7; }
+  100% { transform: translateY(280px); opacity: 0; }
+}
+</style>
+
+<!-- ⚙️ Animation Script -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const ctx = document.getElementById('weeklyChart')?.getContext('2d');
+  const waterSound = document.getElementById('waterSound');
+  const rainContainer = document.getElementById('rainContainer');
+  const treeStage = {{ tree_stage|default:0 }};
+  const isFullyGrown = treeStage === 3;
+  const animate = {{ animate_growth|yesno:"true,false" }};
+
+  // 📊 CO2 Chart
+  if (ctx) {
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Diet', 'Commute', 'Energy', 'Water'],
+        datasets: [{
+          label: 'Kg CO₂',
+          data: [
+            {{ progress.diet|default:0 }},
+            {{ progress.commute|default:0 }},
+            {{ progress.energy|default:0 }},
+            {{ progress.water|default:0 }}
+          ],
+          backgroundColor: ['#81c784', '#64b5f6', '#ffd54f', '#4dd0e1'],
+          borderRadius: 10
+        }]
+      },
+      options: {
+        responsive: true,
+        animation: { duration: 1000 },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: 'CO₂ Emissions (kg)' }
+          }
+        }
+      }
+    });
+  }
+
+  // 🌧️ Tree Growth Animation
+  if (animate) {
+    setTimeout(() => waterSound.play(), 400);
+
+    for (let i = 0; i < 15; i++) {
+      const drop = document.createElement('div');
+      drop.className = 'raindrop';
+      drop.style.left = `${Math.random() * 90}%`;
+      drop.style.animationDelay = `${Math.random() * 0.5}s`;
+      rainContainer.appendChild(drop);
+      setTimeout(() => drop.remove(), 1300);
+    }
+
+    if (isFullyGrown) {
+      setTimeout(() => {
+        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+      }, 1800);
+    }
+  }
+
+  // 🌿 Fade & Scale-in Tree
+  const treeImg = document.getElementById('treeImage');
+  if (treeImg) {
+    treeImg.classList.add('grow');
+  }
+});
+</script>
+{% endblock %}
