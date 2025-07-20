@@ -127,8 +127,10 @@ LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
-ALLOWED_HOSTS = ['EcoTrack.onrender.com']
+ALLOWED_HOSTS = ['ecotrack-1-7nsb.onrender.com', 'localhost', '127.0.0.1']
 DEBUG = False
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+SECRET_KEY = os.environ.get('SECRET_KEY')
